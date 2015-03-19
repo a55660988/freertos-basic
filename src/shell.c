@@ -27,6 +27,7 @@ void test_command(int, char **);
 void _command(int, char **);
 void pwd_command(int, char **);
 void cd_command(int, char **);
+void new_command(int, char **);
 
 char pwd[1024] = "/romfs/";
 
@@ -41,9 +42,10 @@ cmdlist cl[]={
 	MKCL(mmtest, "heap memory allocation test"),
 	MKCL(help, "help"),
 	MKCL(test, "test new function"),
-	MKCL(, ""),
 	MKCL(pwd, "Show the current path"),
 	MKCL(cd, "Change path"),
+	MKCL(new, "Create new task"),
+	MKCL(, ""),
 };
 
 int i_fib(int num){
@@ -307,4 +309,16 @@ void cd_command(int n, char *argv[]){//do it just change pwd arg
         fio_printf(1, "Too many argument!\r\n");
         return;
     }
+}
+// refer from command_prompt
+void new_task(void *pvParameters){
+    //fio_printf(1, "\r\nWe are going to create new task!!\r\n");
+    while(1);
+}
+
+
+void new_command(int n, char *argv[]){
+    xTaskCreate(new_task, (signed portCHAR *) "NEWTASK", 512, NULL, tskIDLE_PRIORITY + 1, NULL);//+1? +2?
+    fio_printf(1, "\r\nWe are going to create new task!!\r\n");
+
 }
