@@ -4,6 +4,7 @@
 #include <string.h>
 #include "fio.h"
 #include "filesystem.h"
+#include <unistd.h>
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -25,6 +26,10 @@ void host_command(int, char **);
 void mmtest_command(int, char **);
 void test_command(int, char **);
 void _command(int, char **);
+void pwd_command(int, char **);
+void cd_command(int, char **);
+
+char pwd[1024] = "/romfs/";
 
 #define MKCL(n, d) {.name=#n, .fptr=n ## _command, .desc=d}
 
@@ -38,6 +43,8 @@ cmdlist cl[]={
 	MKCL(help, "help"),
 	MKCL(test, "test new function"),
 	MKCL(, ""),
+	MKCL(pwd, "Show the current path"),
+	MKCL(cd, "Change path"),
 };
 
 int parse_command(char *str, char *argv[]){
@@ -200,4 +207,69 @@ cmdfunc *do_command(const char *cmd){
 			return cl[i].fptr;
 	}
 	return NULL;	
+}
+
+void pwd_command(int n, char *argv[]){
+	if(n>1){
+        	fio_printf(1, "Too many argument!\r\n");
+		fio_printf(1, "\r\nUsage: pwd\r\n");
+	}else{
+		fio_printf(1, "\r\n%s\r\n", pwd);
+	}
+}
+void cd_command(int n, char *argv[]){//do it just change pwd arg
+    fio_printf(1,"\r\n"); 
+    if(n == 1){
+        fio_printf(2, "\r\nUsage: cd path\r\n");
+    }else if(n == 2){
+        if(strcmp(argv[1], "~") == 0 || strcmp(argv[1], "/")==0){
+            strcpy(pwd, "/romfs/");
+            fio_printf(1, "\r\n%s\r\n", pwd);
+        }else if(strcmp(argv[1], "..") == 0){
+            if(strcmp(pwd, "/romfs/") == 0){
+                fio_printf(1, "\r\n%s\r\n", pwd);
+            }else{
+                char* pch;
+                char pwd_temp[1024];
+                strcpy(pwd_temp, pwd);
+                int last=0, secondlast=0;
+                last = strlen(pwd_temp)-2; // -2 for '\0'
+                pch=strchr(pwd_temp, '/');
+                while(pch!=NULL){
+                    if((pch-pwd_temp+1)!=last){
+                        secondlast = pch-pwd_temp+1;
+                    }else{
+                        pch=strchr(pwd_temp+1, '/');
+                    }
+                }
+                //after find secondlast slash
+                strncpy(pwd, pwd_temp, secondlast); 
+            }
+        }else{//other folder, need to check dir
+            char path[1024];
+            //check first / or not /
+            if(strchr(argv[1], '/')!=0){// no / at first, not from /romfs/
+                strcpy(path, pwd);
+                strcat(path, argv[1]);
+                if(fs_checkdir(path)==1){
+                    strcpy(pwd, path);
+                    fio_printf(1, "\r\n%s\r\n", pwd);
+                }else{
+                    fio_printf(2, "\r\nerror\r\n");
+                }
+            }else{ //from romfs
+                strcpy(path, "/romfs/");
+                strcat(path, argv[1]);
+                if(fs_checkdir(path)==1){
+                    strcpy(pwd, path);
+                    fio_printf(1, "\r\n%s\r\n", pwd);
+                }else{
+                    fio_printf(2, "\r\nerror\r\n");
+                }
+            }
+        }
+    }else{
+        fio_printf(1, "Too many argument!\r\n");
+        return;
+    }
 }

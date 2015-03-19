@@ -233,8 +233,16 @@ static int devfs_open_dir(void * opaque, const char * path){
         return OPENDIR_NOTFOUND;
     }
 }
+static int devfs_check_dir(void * opaque, const char * path){
+    if( strlen(path) == 0 ){
+        // TODO : Add function
+        return dir_open(NULL,NULL,NULL); //might be problem
+    }else{
+        return -1;
+    }
+}
 
 void register_devfs() {
     DBGOUT("Registering devfs.\r\n");
-    register_fs("dev", devfs_open, devfs_open_dir, NULL);
+    register_fs("dev", devfs_open, devfs_open_dir, devfs_check_dir, NULL);
 }
