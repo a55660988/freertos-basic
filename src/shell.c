@@ -4,7 +4,6 @@
 #include <string.h>
 #include "fio.h"
 #include "filesystem.h"
-#include <unistd.h>
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -47,6 +46,25 @@ cmdlist cl[]={
 	MKCL(cd, "Change path"),
 };
 
+int i_fib(int num){
+    int i=0;
+    int x=0, y=1, z=1;
+    for(i=0; i<num; i++){
+       z = x + y;
+       y = x;
+       x = z;
+    }
+    return z;
+}
+int r_fib(int num){
+    if(num<=0){
+        return 0;
+    }else if(num == 1){
+        return 1;
+    }else{
+        return r_fib(num-1) + r_fib(num-2);
+    }
+}
 int parse_command(char *str, char *argv[]){
 	int b_quote=0, b_dbquote=0;
 	int i;
@@ -188,6 +206,29 @@ void test_command(int n, char *argv[]) {
         fio_printf(1, "Write file error! Remain %d bytes didn't write in the file.\n\r", error);
         host_action(SYS_CLOSE, handle);
         return;
+    }
+
+    if(n > 1){
+        if(strcmp(argv[1], "fib") == 0){
+            char buf[128], snum[11];
+            int num=0, i;
+            fio_printf(1, "Iterative or Recursive? ");
+            fio_read(0, buf, 127);
+            fio_printf(1, "\r\nPlease type a number: ");
+            fio_read(0, snum, 10);
+            // cannot use atoi, write some code like atoi
+            // num = atoi(snum);
+            for(i = 0; snum[i]!='\0'; i++){
+                num = num*10 + snum[i] - '0';
+            }
+            if(strcmp(buf, "Iterative")==0){
+                fio_printf(1, "\r\nfibonacci in iterative method: fib(%d) = %d\r\n", num, i_fib(num));
+            }else if(strcmp(buf, "Recursive")==0){
+                fio_printf(1, "\r\nfibonacci in recursive method: fib(%d) = %d\r\n", num, r_fib(num));
+            }else{
+                fio_printf(1, "\r\nError!! Please type Iterative or Recursive!\r\n");
+            }
+        }
     }
 
     host_action(SYS_CLOSE, handle);
