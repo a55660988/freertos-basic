@@ -210,23 +210,17 @@ void test_command(int n, char *argv[]) {
 
     if(n > 1){
         if(strcmp(argv[1], "fib") == 0){
-            char buf[128], snum[11];
             int num=0, i;
-            fio_printf(1, "Iterative or Recursive? ");
-            fio_read(0, buf, 127);
-            fio_printf(1, "\r\nPlease type a number: ");
-            fio_read(0, snum, 10);
             // cannot use atoi, write some code like atoi
-            // num = atoi(snum);
-            for(i = 0; snum[i]!='\0'; i++){
-                num = num*10 + snum[i] - '0';
+            for(i = 0; argv[3][i]!='\0'; i++){
+                num = num*10 + argv[3][i] - '0';
             }
-            if(strcmp(buf, "Iterative")==0){
-                fio_printf(1, "\r\nfibonacci in iterative method: fib(%d) = %d\r\n", num, i_fib(num));
-            }else if(strcmp(buf, "Recursive")==0){
-                fio_printf(1, "\r\nfibonacci in recursive method: fib(%d) = %d\r\n", num, r_fib(num));
+            if(strcmp(argv[2], "Iterative") == 0){
+                fio_printf(1, "fibonacci in iterative method: fib(%d) = %d\r\n", num, i_fib(num));
+            }else if(strcmp(argv[2], "Recursive") == 0){
+                fio_printf(1, "fibonacci in recursive method: fib(%d) = %d\r\n", num, r_fib(num));
             }else{
-                fio_printf(1, "\r\nError!! Please type Iterative or Recursive!\r\n");
+                fio_printf(1, "Error!! Please type Iterative or Recursive!\r\n");
             }
         }
     }
