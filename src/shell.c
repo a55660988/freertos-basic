@@ -318,7 +318,12 @@ void new_task(void *pvParameters){
 
 
 void new_command(int n, char *argv[]){
-    xTaskCreate(new_task, (signed portCHAR *) "NEWTASK", 512, NULL, tskIDLE_PRIORITY + 1, NULL);//+1? +2?
+    if(xTaskCreate(new_task, (signed portCHAR *) "NEWTASK", 512, NULL, tskIDLE_PRIORITY + 1, NULL)!=-1){
+    //+1? +2?
     fio_printf(1, "\r\nWe are going to create new task!!\r\n");
+    }else{
+        fio_printf(1, "\r\nNew task create unsuccessfully!!\r\n");
+        
+    }
 
 }
